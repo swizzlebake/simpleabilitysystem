@@ -1,10 +1,11 @@
 ﻿using System;
-using Swizzlebake.SimpleAbilitySystem.Abilities.Abilities;
-using Swizzlebake.SimpleAbilitySystem.Traits;
 using UnityEngine;
 
 namespace Swizzlebake.SimpleAbilitySystem.Abilities.Data
 {
+    /// <summary>
+    /// Bomber Attribute Data
+    /// </summary>
     [Serializable]
     public struct BomberData
     {
@@ -15,7 +16,10 @@ namespace Swizzlebake.SimpleAbilitySystem.Abilities.Data
         
         public GameObject Prefab;
     }
-    
+
+    /// <summary>
+    /// Represents a configuration for the Bomber entity in the Simple Ability System.
+    /// </summary>
     [CreateAssetMenu(fileName = "BomberData", menuName = "AbilitySystem/BomberData")]
     public class BomberConfig : DataConfig
     {
@@ -28,7 +32,7 @@ namespace Swizzlebake.SimpleAbilitySystem.Abilities.Data
 
         public override ITrait[] GetTraits()
         {
-            var bomberTrait = new BomberTrait();
+            var bomberTrait = new Trait<AttributeSet>();
             bomberTrait.AddAbility(new WanderAbility());
             bomberTrait.AddAbility(new AreaOfEffectAbility());
 

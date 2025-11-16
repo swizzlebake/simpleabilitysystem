@@ -1,10 +1,11 @@
 ﻿using System;
-using Swizzlebake.SimpleAbilitySystem.Abilities.Abilities;
-using Swizzlebake.SimpleAbilitySystem.Abilities.Traits;
 using UnityEngine;
 
 namespace Swizzlebake.SimpleAbilitySystem.Abilities.Data
 {  
+    /// <summary>
+    /// Seeker Attribute Data
+    /// </summary>
     [Serializable]
     public struct SeekerData
     {
@@ -16,7 +17,10 @@ namespace Swizzlebake.SimpleAbilitySystem.Abilities.Data
         
         public GameObject Prefab;
     }
-    
+
+    /// <summary>
+    /// A configuration class used to define the data and behavior of a seeker entity within the Simple Ability System.
+    /// </summary>
     [CreateAssetMenu(fileName = "SeekerData", menuName = "AbilitySystem/SeekerData")]
     public class SeekerConfig : DataConfig
     {
@@ -29,7 +33,7 @@ namespace Swizzlebake.SimpleAbilitySystem.Abilities.Data
 
         public override ITrait[] GetTraits()
         {
-            var seekerTrait = new SeekerTrait();
+            var seekerTrait = new Trait<AttributeSet>();
             seekerTrait.AddAbility(new WanderAbility());
             seekerTrait.AddAbility(new DashAbility());
             seekerTrait.AddAbility(new AreaOfEffectAbility());

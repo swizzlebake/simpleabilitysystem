@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace Swizzlebake.SimpleAbilitySystem.Abilities.Editor
 {
+    /// <summary>
+    /// Custom property drawer for the <see cref="FloatAttribute"/> struct.
+    /// This drawer provides a customized GUI layout for editing fields of FloatAttribute in the Unity Editor.
+    /// </summary>
     [CustomPropertyDrawer(typeof(FloatAttribute))]
     public class FloatAttributePropertyDrawer : PropertyDrawer
     {

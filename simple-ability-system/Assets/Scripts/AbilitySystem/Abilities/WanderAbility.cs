@@ -2,8 +2,14 @@
 using Swizzlebake.SimpleAbilitySystem.Game;
 using UnityEngine;
 
-namespace Swizzlebake.SimpleAbilitySystem.Abilities.Abilities
+namespace Swizzlebake.SimpleAbilitySystem.Abilities
 {
+    /// <summary>
+    /// The WanderAbility class defines an ability for an entity to wander towards a target
+    /// position within a given range. The ability interacts with the game's world and entity
+    /// systems by emitting specific tags when the wandering process starts and ends.
+    /// </summary>
+    /// <seealso cref="Ability"/>
     public class WanderAbility : Ability
     {
         public Vector3 TargetPosition;

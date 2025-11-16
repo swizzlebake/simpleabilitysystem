@@ -4,12 +4,18 @@ using UnityEngine;
 
 namespace Swizzlebake.SimpleAbilitySystem.Game
 {
+    /// <summary>
+    /// Represents a single cell within the world's grid structure, storing the entities contained within it.
+    /// </summary>
     [Serializable]
     public struct WorldCell
     {
         public Entity[] Entities;
     }
-    
+
+    /// <summary>
+    /// Manages the world grid system, handles entity placement, retrieval, and interactions within a defined world space.
+    /// </summary>
     public class WorldManager : MonoBehaviour
     {
         private const int _worldGridSizeX = 5;
@@ -33,6 +39,14 @@ namespace Swizzlebake.SimpleAbilitySystem.Game
             }
         }
 
+        /// <summary>
+        /// Adds an entity to the world at its current grid cell location.
+        /// If the grid cell is full, the entity array is resized to accommodate the new entity.
+        /// </summary>
+        /// <param name="entity">The <see cref="Entity"/> to be added to the world grid system.</param>
+        /// <returns>
+        /// The index of the grid cell where the entity was added or -1 if no valid grid cell could be determined.
+        /// </returns>
         public int AddEntity(Entity entity)
         {
             var gridCell = GetGridCell(entity.transform);
@@ -63,6 +77,13 @@ namespace Swizzlebake.SimpleAbilitySystem.Game
             return gridCell;
         }
 
+        /// <summary>
+        /// Calculates the grid cell index for a given world position.
+        /// </summary>
+        /// <param name="position">The world position for which to determine the grid cell index.</param>
+        /// <returns>
+        /// The index of the grid cell corresponding to the provided position, or -1 if the position is outside the valid grid boundaries.
+        /// </returns>
         public int GetGridCell(Vector3 position)
         {
             var x = Mathf.FloorToInt(position.x / ( _worldGridSizeX));
@@ -75,20 +96,35 @@ namespace Swizzlebake.SimpleAbilitySystem.Game
             
             return x + z * _worlGridCountX;
         }
-        
+
+        /// <summary>
+        /// Retrieves the index of the grid cell corresponding to the position of a specified Transform.
+        /// </summary>
+        /// <param name="systemTransform">The <see cref="Transform"/> whose position is used to determine the grid cell index.</param>
+        /// <returns>
+        /// The index of the grid cell that contains the specified Transform's position or -1 if no valid grid cell is found.
+        /// </returns>
         public int GetGridCell(Transform systemTransform)
         {
             return GetGridCell(systemTransform.position);
         }
 
+        /// <summary>
+        /// Retrieves all entities within a specified range from a given entity.
+        /// This method checks neighboring grid cells to optimize the search and filters results by distance.
+        /// </summary>
+        /// <param name="from">The <see cref="Entity"/> from which the range is calculated.</param>
+        /// <param name="range">The maximum distance within which to search for entities.</param>
+        /// <returns>
+        /// An array of <see cref="Entity"/> instances that are located within the specified range.
+        /// </returns>
         public Entity[] GetEntitiesInRange(Entity from, float range)
         {
-            var cell = GetGridCell(from.transform);
             var cellX = Mathf.FloorToInt(from.transform.position.x / ( _worldGridSizeX));
             var cellZ = Mathf.FloorToInt(from.transform.position.z / (_worldGridSizeZ));
             var cellsInRangeX = Mathf.FloorToInt((from.transform.position.x + range)/WorldSizeX);
             var cellsInRangeZ = Mathf.FloorToInt((from.transform.position.z + range)/WorldSizeZ);
-            var entities = new Entity[40];
+            var entities = new Entity[GameConstants.EntityCount];
             var entityIndex = 0;
             for (int x = cellX-cellsInRangeX; x < cellX+cellsInRangeX; x++)
             {
@@ -102,7 +138,7 @@ namespace Swizzlebake.SimpleAbilitySystem.Game
                     var entitiesInCell = GetEntitiesInGridCell(x + z * _worlGridCountX);
                     for (int i = 0; i < entitiesInCell.Length; i++)
                     {
-                        if (entitiesInCell[i] == null || entitiesInCell[i] == from)
+                        if (!entitiesInCell[i] || entitiesInCell[i] == from)
                         {
                             continue;
                         }
@@ -128,12 +164,27 @@ namespace Swizzlebake.SimpleAbilitySystem.Game
             Array.Resize(ref results, resultIndex);
             return results;
         }
-        
+
+        /// <summary>
+        /// Retrieves all entities located in a specified grid cell.
+        /// </summary>
+        /// <param name="gridCell">The index of the grid cell from which to retrieve entities.</param>
+        /// <returns>
+        /// An array of <see cref="Entity"/> objects present in the specified grid cell.
+        /// </returns>
         public Entity[] GetEntitiesInGridCell(int gridCell)
         {
             return _worldCells[gridCell].Entities;
         }
 
+        /// <summary>
+        /// Handles the movement of an entity from one grid cell to another within the world grid system.
+        /// Removes the entity from the original grid cell and places it in the target cell.
+        /// If the target cell is full, resizes the entity array in the cell to accommodate the addition.
+        /// </summary>
+        /// <param name="entity">The <see cref="Entity"/> that has moved between grid cells.</param>
+        /// <param name="fromCell">The index of the grid cell the entity is moving from.</param>
+        /// <param name="toCell">The index of the grid cell the entity is moving to.</param>
         public void EntityMovedCell(Entity entity, int fromCell, int toCell)
         {
             for (int i = 0; i < _worldCells[fromCell].Entities.Length; i++)
@@ -163,6 +214,15 @@ namespace Swizzlebake.SimpleAbilitySystem.Game
             }
         }
 
+        /// <summary>
+        /// Calculates a random position within a specified range of the owner's transform.
+        /// Attempts to find a valid position up to a defined maximum number of attempts, ensuring it is within a valid grid cell in the world.
+        /// </summary>
+        /// <param name="ownerTransform">The transform of the entity requesting a new position in range.</param>
+        /// <param name="range">The maximum distance from the owner's position to calculate the random position.</param>
+        /// <returns>
+        /// A valid random position within the specified range, or the owner's current position if no valid position is found after exhausting attempts.
+        /// </returns>
         public Vector3 GetPositionInRange(Transform ownerTransform, float range)
         {
             const int maxAttempts = 10;

@@ -1,8 +1,13 @@
 ﻿using Swizzlebake.SimpleAbilitySystem.Game;
 using UnityEngine;
 
-namespace Swizzlebake.SimpleAbilitySystem.Abilities.Abilities
+namespace Swizzlebake.SimpleAbilitySystem.Abilities
 {
+    /// <summary>
+    /// Represents an ability that allows an entity to perform a dash towards a target within a specified range.
+    /// This ability is based on the <see cref="Ability"/> class functionality.
+    /// </summary>
+    /// <seealso cref="Ability"/>
     public class DashAbility : Ability
     {
         public Entity TargetEntity;

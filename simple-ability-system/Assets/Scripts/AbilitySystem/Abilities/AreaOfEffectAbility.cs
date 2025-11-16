@@ -1,8 +1,13 @@
 ﻿using Swizzlebake.SimpleAbilitySystem.Abilities.Effects;
 using Swizzlebake.SimpleAbilitySystem.Game;
 
-namespace Swizzlebake.SimpleAbilitySystem.Abilities.Abilities
+namespace Swizzlebake.SimpleAbilitySystem.Abilities
 {
+    /// <summary>
+    /// Represents an ability that applies an area of effect (AoE) to entities within range,
+    /// dealing damage to all valid targets except the owner of the ability.
+    /// </summary>
+    /// <seealso cref="Ability"/>
     public class AreaOfEffectAbility : Ability
     {
         public override bool ActivateAbility(WorldManager worldManager, Entity owner)

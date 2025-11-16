@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Swizzlebake.SimpleAbilitySystem.Game;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,127 +7,126 @@ namespace Swizzlebake.SimpleAbilitySystem.Abilities
 {
     public class AbilitySystem
     {
-        public (EffectParams effectParams, float duration)[] ActiveEffects = new (EffectParams effect, float duration)[1];
-        private int _traitIndex = 0;
-        private ITrait[] _traits = Array.Empty<ITrait>();
-        
+        private const int InitialEffectCapacity = 4;
+
+        private readonly List<ITrait> _traits = new();
+        private readonly List<(EffectParams effect, float duration)> _activeEffects = new(InitialEffectCapacity);
+
+        /// <summary>
+        /// Updates all traits and their abilities
+        /// </summary>
         public void Update(WorldManager worldManager, Entity owner, float dt)
         {
             foreach (var trait in _traits)
             {
-                if (trait == null)
-                {
-                    continue;
-                }
-                
-                foreach (var ability in trait.GetAbilities())
-                {
-                    if (ability == null)
-                    {
-                        continue;
-                    }
-
-                    if (ability.CanActivateAbility())
-                    {
-                        ability.ActivateAbility(worldManager, owner);
-                    }
-                    
-                    ability.TickAbility(owner, dt);
-                }
+                ProcessTraitAbilities(trait, worldManager, owner, dt);
             }
         }
 
-        public void LateUpdate()
-        {
-            ClearExpiredEffects();
-        }
+        /// <summary>
+        /// Performs cleanup of expired effects
+        /// </summary>
+        public void LateUpdate() => ClearExpiredEffects();
 
-        public void AddTraits(ITrait[] traits)
+        /// <summary>
+        /// Adds multiple traits to the ability system
+        /// </summary>
+        public void AddTraits(IEnumerable<ITrait> traits)
         {
             foreach (var trait in traits)
             {
-                AddTrait(trait);
+                _traits.Add(trait);
             }
         }
-        
-        void AddTrait(ITrait trait)
-        {
-            if (_traitIndex + 1 >= _traits.Length)
-            {
-                Array.Resize(ref _traits, Mathf.Max(_traits.Length * 2, 2));
-            }
 
-            _traits[_traitIndex++] = trait;
-        }
-        
+        /// <summary>
+        /// Applies an effect to this ability system
+        /// </summary>
         public void ApplyEffect(Effect effect, AbilitySystem instigator)
         {
-            var effectParams = AddEffect(effect, instigator);
-            for (int i = 0; i < _traitIndex; i++)
-            {
-                var set = _traits[i].GetSet();
-                set.ApplyEffect(effectParams);
-            }
-            
-            effectParams.Effect.Applied(this);
-        }
-        
-        EffectParams AddEffect(Effect effect, AbilitySystem instigator)
-        {
-            var effectParams = new EffectParams() { Effect = effect, Instigator = instigator, Target = this };
-            for (int i = 0; i < ActiveEffects.Length; i++)
-            {
-                if (ActiveEffects[i].effectParams.Effect == null)
-                {
-                    ActiveEffects[i] = (effectParams, effect.Duration);
-                    return effectParams;
-                }
-            }
+            if (effect == null) return;
 
-            var length = ActiveEffects.Length;
-            Array.Resize(ref ActiveEffects, Mathf.Max(ActiveEffects.Length * 2, 2));
-            ActiveEffects[length] = (effectParams, effect.Duration);
-            return effectParams;
+            var effectParams = CreateAndAddEffect(effect, instigator);
+            ApplyEffectToTraits(effectParams);
+            effect.Applied(this);
         }
 
-        void ClearExpiredEffects()
-        {
-            for (int i = 0; i < ActiveEffects.Length; i++)
-            {
-                if (ActiveEffects[i].effectParams.Effect != null && ActiveEffects[i].duration <= 0)
-                {
-                    ActiveEffects[i].effectParams.Effect.Expired(this);
-                    ActiveEffects[i].effectParams = default;
-                    ActiveEffects[i].duration = 0;
-                }
-            }
-        }
-
+        /// <summary>
+        /// Gets the value of a named attribute from traits
+        /// </summary>
         public float GetAttributeValue(string attributeName)
         {
             foreach (var trait in _traits)
             {
-                if (trait == null)
-                {
-                    continue;
-                }
-                
                 var (success, value) = trait.GetSet().GetFloatAttribute(attributeName);
-                if (success)
-                {
-                    return value;
-                }
+                if (success) return value;
             }
 
-            Debug.LogWarning("The attribute " + attributeName + " was not found in any trait!");
+            Debug.LogWarning($"Attribute '{attributeName}' not found in any trait!");
             return 0.0f;
         }
 
+        /// <summary>
+        /// Registers a callback for attribute changes
+        /// </summary>
         public void RegisterAttributeChange(UnityAction<AttributeSetParams> action)
         {
-            for (int i = 0; i < _traitIndex; i++)
+            foreach (var trait in _traits)
             {
-               _traits[i].GetSet().RegisterOnAttributeChange(action);
+                trait.GetSet().RegisterOnAttributeChange(action);
+            }
+        }
+
+        private void ProcessTraitAbilities(ITrait trait, WorldManager worldManager, Entity owner, float dt)
+        {
+            foreach (var ability in trait.GetAbilities())
+            {
+                if (ability == null) continue;
+
+                if (ability.CanActivateAbility())
+                {
+                    ability.ActivateAbility(worldManager, owner);
+                }
+
+                ability.TickAbility(owner, dt);
+            }
+        }
+
+        private EffectParams CreateAndAddEffect(Effect effect, AbilitySystem instigator)
+        {
+            var effectParams = new EffectParams
+            {
+                Effect = effect,
+                Instigator = instigator,
+                Target = this
+            };
+
+            _activeEffects.Add(new (effectParams, effect.Duration));
+            return effectParams;
+        }
+
+        private void ApplyEffectToTraits(EffectParams effectParams)
+        {
+            foreach (var trait in _traits)
+            {
+                trait.GetSet().ApplyEffect(effectParams);
+            }
+        }
+
+        private void ClearExpiredEffects()
+        {
+            for (int i = _activeEffects.Count - 1; i >= 0; i--)
+            {
+                if (_activeEffects[i].duration <= 0)
+                {
+                    foreach (var trait in _traits)
+                    {
+                        trait.GetSet().RemoveEffect(_activeEffects[i].effect);
+                    }
+                    
+                    _activeEffects[i].effect.Effect.Expired(this);
+                    _activeEffects.RemoveAt(i);
+                }
             }
         }
     }

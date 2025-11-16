@@ -5,6 +5,10 @@ using UnityEngine.Events;
 
 namespace Swizzlebake.SimpleAbilitySystem.Visuals
 {
+    /// <summary>
+    /// Manages visual effects associated with an in-game entity, responding primarily to attribute changes,
+    /// such as health, to trigger visual feedback or animations.
+    /// </summary>
     public class EntityVisuals : MonoBehaviour
     {
         [SerializeField]
@@ -42,17 +46,15 @@ namespace Swizzlebake.SimpleAbilitySystem.Visuals
 
             if (gameTag == GameConstants.TagAttacked)
             {
-                _onAttack?.Invoke();;
-                Debug.Log(transform.root.name + " Attack at " + Time.time);
+                _onAttack?.Invoke();
             }
         }
 
-        public void OnAttributeChanged(AttributeSetParams setParams)
+        private void OnAttributeChanged(AttributeSetParams setParams)
         {
             if (setParams.AttributeName.Equals("Health"))
             {
                 _material.SetFloat(_materialFlashParameter, Time.time);
-                Debug.Log(transform.root.name + " Damage at " + Time.time);
             }
         }
     }

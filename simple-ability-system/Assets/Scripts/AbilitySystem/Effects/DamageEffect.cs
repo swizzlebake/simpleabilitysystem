@@ -1,21 +1,17 @@
-﻿namespace Swizzlebake.SimpleAbilitySystem.Abilities.Effects
+﻿using Swizzlebake.SimpleAbilitySystem.Game;
+
+namespace Swizzlebake.SimpleAbilitySystem.Abilities.Effects
 {
+    /// <summary>
+    /// Represents a specific type of effect that applies damage to a target
+    /// in the ability system. This class modifies an entity's attributes
+    /// by reducing its health value based on the specified damage amount.
+    /// </summary>
     public class DamageEffect : Effect
     {
-        private readonly float _damage;
-
         public DamageEffect(float damage)
         {
-            _damage = damage;
-            _modifiers = new[] { new FloatAttributeModifier { Name = "Health", AddValue = -damage, MultiplyValue = 1 } };
-        }
-        public override void Applied(AbilitySystem abilitySystem)
-        {
-        }
-
-        public override void Expired(AbilitySystem abilitySystem)
-        {
-            
+            _modifiers = new[] { new FloatAttributeModifier { Name = GameConstants.AttributeHealth, AddValue = -damage, MultiplyValue = 1 } };
         }
     }
 }

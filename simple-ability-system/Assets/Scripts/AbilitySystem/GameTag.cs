@@ -2,6 +2,14 @@
 
 namespace Swizzlebake.SimpleAbilitySystem.Abilities
 {
+    /// <summary>
+    /// Represents a game tag used to identify specific attributes or categories within a game system.
+    /// </summary>
+    /// <remarks>
+    /// The <c>GameTag</c> struct is primarily used to mark or label objects, abilities, or entities with specific tags,
+    /// allowing the game system to respond to or manage features based on these associations.
+    /// This struct also implements comparison operations for simplified tag matching logic.
+    /// </remarks>
     [Serializable]
     public struct GameTag : IEquatable<GameTag>
     {
