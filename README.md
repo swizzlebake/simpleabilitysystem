@@ -11,19 +11,20 @@ I tried to keep the structures lean, a clean separtion between serialized data a
 
 # structure
 Core classes worth noting:
-Trait -> contains a set of attributes and a set of abilities
-Ability -> handles the action of performing an ability and possibly applying effects
-Effect -> modifies attributes for a duration (duration effects not implemented yet)
-FloatAttribute -> an attribute backed by a float, some light editor tooling is used to show this in inspectors
-AbilitySystem -> manages a set of abiltiies (via traits) and active effects
-Entity -> the root object to query for and keep references to in the world
-GameTag -> a tag used as a marker for references or to handle game tag events
+
+	Trait -> contains a set of attributes and a set of abilities
+	Ability -> handles the action of performing an ability and possibly applying effects
+	Effect -> modifies attributes for a duration (duration effects not implemented yet)
+	FloatAttribute -> an attribute backed by a float, some light editor tooling is used to show this in inspectors
+	AbilitySystem -> manages a set of abiltiies (via traits) and active effects
+	Entity -> the root object to query for and keep references to in the world
+	GameTag -> a tag used as a marker for references or to handle game tag events
 
 Config:
-DataConfig -> contains methods to be overidden by subclasses to return prefab and traits
+	DataConfig -> contains methods to be overidden by subclasses to return prefab and traits
 
 Visual:
-EntityVisuals -> handles the visual representation of an event or change to attributes
+	EntityVisuals -> handles the visual representation of an event or change to attributes
 
 # thoughts
 My biggest issue with the code is the use of strings, I'd prefer something with a string name but some backing field like an int/guid that can be relied upon in cases of renaming. 
