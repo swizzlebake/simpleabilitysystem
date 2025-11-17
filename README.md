@@ -21,9 +21,11 @@ Core classes worth noting:
 	GameTag -> a tag used as a marker for references or to handle game tag events
 
 Config:
+
 	DataConfig -> contains methods to be overidden by subclasses to return prefab and traits
 
 Visual:
+
 	EntityVisuals -> handles the visual representation of an event or change to attributes
 
 # thoughts
